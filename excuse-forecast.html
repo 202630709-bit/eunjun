@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>핑계 예보</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --ground:#F7F5FC; --surface:#FFFFFF; --surface-2:#F3F1FA; --ink:#1E1B3A; --muted:#5C5A78; --line:#E2DFF0;
+  --accent:#5046E5; --accent-ink:#FFFFFF; --focus:#5046E5; --accent-soft:#EFEEFE; --sun:#FFCF5C;
+  --sky-1:#E2DFFB; --sky-2:#FDEEE6; --shadow:0 1px 2px rgba(48,40,120,.06),0 10px 28px -14px rgba(48,40,120,.22);
+  --low:#0E6B48; --mid:#8A5600; --high:#B3291F;
+  --low-fill:#2FB67C; --mid-fill:#F5B83D; --high-fill:#EF5F55;
+  --low-bg:#E2F6EC; --mid-bg:#FDF1D6; --high-bg:#FCE4E1;
+  --chat-bg:#B9C9DA; --bubble:#FFE94D; --bubble-ink:#2B2500;
+  --font-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  --font-display:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0F0E1F; --surface:#17162B; --surface-2:#1E1D38; --ink:#EEEDFA; --muted:#AAA8C8; --line:#2D2B4D;
+    --accent:#A7A2FF; --accent-ink:#0F0E1F; --focus:#A7A2FF; --accent-soft:#25234B; --sun:#E9B949;
+    --sky-1:#1E1B47; --sky-2:#2A2035; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.55);
+    --low:#59D69A; --mid:#F0B94A; --high:#FF8A82;
+    --low-fill:#3DBB80; --mid-fill:#F0B94A; --high-fill:#FF7B72;
+    --low-bg:#123324; --mid-bg:#382C10; --high-bg:#3B1C1C;
+    --chat-bg:#26364D; --bubble:#FFE94D; --bubble-ink:#2B2500;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0F0E1F; --surface:#17162B; --surface-2:#1E1D38; --ink:#EEEDFA; --muted:#AAA8C8; --line:#2D2B4D;
+  --accent:#A7A2FF; --accent-ink:#0F0E1F; --focus:#A7A2FF; --accent-soft:#25234B; --sun:#E9B949;
+  --sky-1:#1E1B47; --sky-2:#2A2035; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.55);
+  --low:#59D69A; --mid:#F0B94A; --high:#FF8A82;
+  --low-fill:#3DBB80; --mid-fill:#F0B94A; --high-fill:#FF7B72;
+  --low-bg:#123324; --mid-bg:#382C10; --high-bg:#3B1C1C;
+  --chat-bg:#26364D; --bubble:#FFE94D; --bubble-ink:#2B2500;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--ground)}
+body{margin:0;background:linear-gradient(180deg,var(--sky-1) 0,var(--sky-2) 260px,var(--ground) 540px) no-repeat var(--ground);color:var(--ink);font-family:var(--font-body);font-size:1rem;line-height:1.65;letter-spacing:-.003em;word-break:keep-all;overflow-wrap:anywhere;-webkit-text-size-adjust:100%}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+button,input{font:inherit;color:inherit}
+
+.wrap{max-width:1120px;margin:0 auto;padding:clamp(20px,4vw,44px) max(16px,env(safe-area-inset-right)) 56px max(16px,env(safe-area-inset-left))}
+.hero{margin-bottom:clamp(24px,4vw,36px)}
+.badge{display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;padding:5px 12px 5px 10px;border-radius:99px;background:color-mix(in srgb,var(--surface) 75%,transparent);border:1px solid var(--line);font-size:.8125rem;font-weight:600;color:var(--muted);backdrop-filter:blur(6px)}
+.badge i{width:8px;height:8px;border-radius:50%;background:var(--low-fill);box-shadow:0 0 0 3px color-mix(in srgb,var(--low-fill) 25%,transparent)}
+h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:clamp(2.75rem,7vw+.5rem,4.5rem);line-height:1.05;letter-spacing:-.045em;color:var(--ink)}
+h1 .t2{color:var(--accent);background:linear-gradient(100deg,var(--accent) 10%,#B15CE8 90%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+h1 .sun{display:inline-block;width:.2em;height:.2em;margin-left:.08em;vertical-align:.72em;border-radius:50%;background:var(--sun);box-shadow:0 0 0 .07em color-mix(in srgb,var(--sun) 35%,transparent),0 0 .5em .12em color-mix(in srgb,var(--sun) 55%,transparent)}
+.lead{margin:10px 0 0;max-width:30em;color:var(--muted);font-size:1.0625rem;line-height:1.7;letter-spacing:-.01em}
+.lead b{color:var(--ink);font-weight:600;background:linear-gradient(transparent 60%,color-mix(in srgb,var(--sun) 65%,transparent) 60%)}
+.steps{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;font-size:.8125rem;font-weight:600;color:var(--muted)}
+.steps li{display:flex;align-items:center;gap:8px}
+.steps li + li::before{content:"";width:16px;height:1px;background:var(--muted);opacity:.4}
+.steps span{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:.6875rem}
+@media (max-width:480px){.lead br{display:none}.lead{font-size:1rem}}
+
+.app{display:grid;grid-template-columns:360px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:880px){.app{grid-template-columns:1fr}}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+fieldset{border:0;margin:0 0 22px;padding:0;min-width:0}
+legend,.field-label{display:block;font-weight:600;font-size:.875rem;letter-spacing:-.005em;padding:0;margin:0 0 10px}
+.field{margin:0 0 22px}
+.hint{font-size:.8125rem;color:var(--muted);margin:6px 0 0}
+
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{position:relative;display:block}
+.seg input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.seg span{display:block;padding:8px 13px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:.9375rem;line-height:1.4;transition:border-color .15s ease,background .15s ease}
+.seg label:hover span{border-color:var(--accent)}
+.seg input:checked + span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.seg input:focus-visible + span{outline:3px solid var(--focus);outline-offset:2px}
+.seg input:disabled{cursor:not-allowed}
+.seg input:disabled + span{opacity:.4}
+.seg.two label{flex:1 1 calc(50% - 4px)}
+.seg.two span{text-align:center}
+.seg.chips span{padding:6px 11px;border-radius:8px;font-size:.875rem}
+.seg.chips input:checked + span{background:var(--accent-soft);border-color:var(--accent);color:var(--ink);font-weight:600}
+
+.imp-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.imp-out{font-size:.875rem;color:var(--muted)}
+.imp-out b{color:var(--ink);font-size:1rem}
+input[type=range]{width:100%;margin:6px 0 0;accent-color:var(--accent)}
+
+.text-in{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.text-in::placeholder{color:var(--muted);opacity:.8}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+@media (max-width:420px){.two-col{grid-template-columns:1fr}}
+
+.check{display:flex;gap:10px;align-items:flex-start;margin:0 0 10px;font-size:.9375rem;cursor:pointer}
+.check input{margin:4px 0 0;width:18px;height:18px;accent-color:var(--accent);flex:none}
+
+.res-head{margin:0 0 16px}
+h2{font-size:1.1875rem;font-weight:700;line-height:1.35;letter-spacing:-.01em;margin:0 0 4px}
+.summary{margin:0;color:var(--muted);font-size:.875rem}
+.note{margin:0 0 14px;padding:10px 14px;border-radius:10px;background:var(--mid-bg);color:var(--mid);font-size:.9rem}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:18px;padding:28px 24px}
+.empty p{margin:0;color:var(--muted);max-width:32em}
+
+ol.list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.card.first{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),var(--shadow);background:linear-gradient(180deg,var(--accent-soft),var(--surface) 90px)}
+.card-head{width:100%;background:none;border:0;text-align:left;padding:16px 18px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;cursor:pointer}
+.rank{font-family:var(--font-display);font-size:1.5rem;font-weight:700;letter-spacing:-.02em;line-height:1;min-width:1.2em;text-align:center;color:var(--muted)}
+.card.first .rank{color:var(--accent)}
+.title{display:block;font-weight:600;font-size:.9375rem;letter-spacing:-.005em;line-height:1.4}
+.cat{display:inline-block;margin-top:4px;font-size:.75rem;color:var(--muted)}
+.cat.honest{color:var(--low);font-weight:600}
+.risk{display:grid;gap:6px;justify-items:end;min-width:112px}
+.risk-label{font-size:.75rem;font-weight:600;letter-spacing:-.005em}
+.risk-label.low{color:var(--low)} .risk-label.mid{color:var(--mid)} .risk-label.high{color:var(--high)}
+.gauge{position:relative;width:112px;height:6px;border-radius:99px;background:linear-gradient(90deg,var(--low-fill),var(--mid-fill) 55%,var(--high-fill))}
+.gauge i{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--ink);transform:translate(-50%,-50%);transition:left .3s ease}
+@media (max-width:520px){
+  .card-head{grid-template-columns:auto minmax(0,1fr)}
+  .risk{grid-column:1 / -1;grid-template-columns:auto 1fr;justify-items:stretch;align-items:center;gap:12px}
+  .gauge{width:100%}
+}
+
+.card-body{padding:2px 16px 16px;border-top:1px solid var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 16px}
+.chip{font-size:.75rem;font-weight:500;padding:4px 10px;border-radius:6px;background:var(--surface-2);color:var(--muted)}
+.chip.good{background:var(--low-bg);color:var(--low)}
+.chip.warn{background:var(--mid-bg);color:var(--mid)}
+
+.tone{margin:0 0 12px}
+.chat{background:var(--chat-bg);border-radius:14px;padding:14px;display:flex;justify-content:flex-end;align-items:flex-end;gap:8px}
+.time{font-size:.6875rem;color:var(--ink);opacity:.75;white-space:nowrap}
+.bubble{background:var(--bubble);color:var(--bubble-ink);padding:10px 13px;border-radius:14px 14px 4px 14px;max-width:min(32em,86%);white-space:pre-wrap;line-height:1.55;user-select:text;-webkit-user-select:text}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+.fb-label{font-size:.8125rem;color:var(--muted);margin-left:auto}
+.btn{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:600;font-size:.875rem;letter-spacing:-.005em}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600;box-shadow:0 6px 14px -6px color-mix(in srgb,var(--accent) 70%,transparent)}
+.link-btn{background:none;border:0;padding:6px 0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-weight:600;font-size:.875rem}
+@media (max-width:520px){.fb-label{margin-left:0;flex-basis:100%}}
+
+.more{margin:12px 0 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.foot{margin:28px 0 0;max-width:46em;font-size:.8125rem;color:var(--muted)}
+
+.toast{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:0 16px calc(16px + env(safe-area-inset-bottom,0px));pointer-events:none;opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease}
+.toast.show{opacity:1;transform:none}
+.toast span{background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:10px;font-size:.9375rem;max-width:min(30em,100%)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <p class="badge"><i aria-hidden="true"></i><span id="today">오늘의 예보</span></p>
+    <h1><span class="t1">핑계</span> <span class="t2">예보</span><span class="sun" aria-hidden="true"></span></h1>
+    <p class="lead">약속 정보를 넣으면 <b>덜 위험한 사유</b>부터 순서대로 보여 주고,<br>바로 보낼 <b>카톡 문구</b>까지 만들어 드려요.</p>
+    <ol class="steps" aria-label="이용 순서">
+      <li><span>1</span>약속 정보 입력</li>
+      <li><span>2</span>리스크 순위 확인</li>
+      <li><span>3</span>카톡 문구 복사</li>
+    </ol>
+  </header>
+
+  <main class="app">
+    <form class="panel" id="form" autocomplete="off" novalidate>
+      <fieldset>
+        <legend>어떤 상황인가요?</legend>
+        <div class="seg two">
+          <label><input type="radio" name="mode" value="cancel" checked><span>못 가게 됐어요</span></label>
+          <label><input type="radio" name="mode" value="late"><span>늦을 것 같아요</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>약속까지 남은 시간</legend>
+        <div class="seg two" id="timing"></div>
+      </fieldset>
+
+      <div class="field">
+        <div class="imp-row">
+          <label class="field-label" for="imp" style="margin:0">약속의 중요도</label>
+          <span class="imp-out" id="impOut"></span>
+        </div>
+        <input type="range" id="imp" name="imp" min="1" max="5" step="1" value="3">
+      </div>
+
+      <fieldset>
+        <legend>상대는 누구인가요?</legend>
+        <div class="seg" id="rel"></div>
+      </fieldset>
+
+      <div class="two-col">
+        <div>
+          <label class="field-label" for="name">상대 호칭 (선택)</label>
+          <input class="text-in" id="name" name="name" type="text" maxlength="20" placeholder="예: 민수, 팀장님">
+        </div>
+        <div>
+          <label class="field-label" for="alt" id="altLabel">다시 잡을 시점 (선택)</label>
+          <input class="text-in" id="alt" name="alt" type="text" maxlength="20" placeholder="예: 이번 주말">
+        </div>
+      </div>
+
+      <fieldset>
+        <legend>최근 2주 안에 이 상대에게 쓴 유형</legend>
+        <div class="seg chips" id="recent"></div>
+        <p class="hint">같은 유형을 반복하면 순위가 내려가요.</p>
+      </fieldset>
+
+      <label class="check"><input type="checkbox" name="honestOnly"><span>솔직한 사유만 보기</span></label>
+      <label class="check" style="margin-bottom:0"><input type="checkbox" name="weather"><span>오늘 날씨가 실제로 궂어요 (비, 눈, 한파 등)</span></label>
+    </form>
+
+    <section id="results" aria-label="추천 결과"></section>
+  </main>
+
+  <p class="foot">가장 오래 신뢰를 지키는 방법은 짧고 솔직하게 말하는 거예요. 가족의 사망이나 중병처럼 남에게 쓰면 안 되는 사유는 목록에서 뺐고, 입력한 내용과 사용 이력은 이 기기의 브라우저에만 저장돼요.</p>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toastText"></span></div>
+
+<script>
+(function(){
+'use strict';
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- 기본 데이터 ---------- */
+// r 배열 순서: 친구, 연인, 직장 동료, 상사·거래처, 가족, 모임·동호회
+const REL = [
+  {id:'friend',  label:'친구',       sens:.5, tones:['casual','funny','polite'], def:'casual'},
+  {id:'lover',   label:'연인',       sens:.9, tones:['casual','funny','polite'], def:'casual'},
+  {id:'coworker',label:'직장 동료',  sens:.8, tones:['polite','casual'],         def:'polite'},
+  {id:'boss',    label:'상사·거래처', sens:1,  tones:['polite'],                  def:'polite'},
+  {id:'family',  label:'가족',       sens:.8, tones:['casual','polite'],         def:'casual'},
+  {id:'group',   label:'모임·동호회', sens:.6, tones:['polite','casual'],         def:'polite'}
+];
+const TIMING = ['하루 이상 남음','3~24시간 남음','1~3시간 남음','1시간 이내·이미 지남'];
+const CATS = ['건강','이동','업무','집안·개인','일정'];
+const TONE_LABEL = {polite:'정중하게', casual:'편하게', funny:'유머 있게'};
+const TONE_IDX = {polite:0, casual:1, funny:2};
+const IMP_LABEL = {1:'가벼운 약속',2:'편한 약속',3:'보통',4:'중요한 약속',5:'절대 어기면 안 됨'};
+
+// v: 상대가 확인할 수 있는 정도(1~10), s: 들켰을 때 후폭풍(1~10), t: 시점 적합도, r: 상대 적합도
+// x: [정중, 편하게, 유머]
+const DB = [
+ {id:'h-tired', cat:'솔직', honest:true, title:'체력이 바닥이라고 솔직하게 말하기', v:1, s:2, r:[1,.9,.5,.3,.9,.7],
+  cancel:{t:[.9,.9,.7,.4], x:[
+   '요즘 체력 관리가 잘 안 돼서 오늘은 쉬어야 할 것 같습니다. 죄송합니다.',
+   '요즘 체력이 바닥이라 오늘은 좀 쉬어야 할 것 같아. 미안해!',
+   '내 체력 게이지가 빨간불이야. 오늘은 충전하러 갈게, 미안!']}},
+ {id:'h-overload', cat:'솔직', honest:true, title:'일정이 몰려서 조정을 부탁하기', v:1, s:2, r:[1,1,.7,.5,.9,.8],
+  cancel:{t:[1,.9,.6,.3], x:[
+   '이번 주 일정이 너무 몰려서 약속을 지키기 어려울 것 같습니다. 죄송합니다.',
+   '이번 주 일정이 너무 몰려서 오늘은 도저히 못 갈 것 같아. 미안해!',
+   '내 달력이 이번 주에 폭주했어. 오늘은 도저히 못 가겠어, 미안!']}},
+ {id:'h-forgot', cat:'솔직', honest:true, title:'일정을 놓쳤다고 인정하기', v:1, s:3, r:[1,.9,.7,.5,.9,.7],
+  cancel:{t:[.2,.4,.8,1], x:[
+   '제가 일정을 제대로 확인하지 못했습니다. 오늘은 참석이 어려울 것 같아 정말 죄송합니다.',
+   '나 일정을 완전히 놓쳤어… 오늘은 못 갈 것 같아, 진짜 미안해.',
+   '내 캘린더 알림이 나를 배신했어. 오늘은 못 갈 것 같아, 진짜 미안!']},
+  late:{t:[0,0,.9,1], x:[
+   '제가 시간을 착각했습니다. 지금 바로 출발하겠습니다. 정말 죄송합니다.',
+   '나 시간을 착각했어… 지금 바로 출발할게, 진짜 미안!',
+   '내 시간 감각이 잠깐 고장 났었어. 지금 바로 달려갈게!']}},
+ {id:'h-prep', cat:'솔직', honest:true, title:'준비가 길어졌다고 인정하기', v:1, s:2, r:[1,1,.7,.5,1,.9],
+  late:{t:[0,0,.8,1], x:[
+   '준비가 예상보다 길어져서 조금 늦을 것 같습니다. 죄송합니다.',
+   '준비가 생각보다 오래 걸렸어. 조금 늦을 것 같아, 미안!',
+   '준비하다 시간이 순삭당했어. 곧 도착할게!']}},
+ {id:'transit', cat:'이동', title:'타고 가는 대중교통이 지연됨', v:6, s:2, r:[1,1,.9,.85,1,.9],
+  late:{t:[0,0,.8,1], x:[
+   '이용 중인 대중교통이 지연되어 예정보다 늦을 것 같습니다. 죄송합니다.',
+   '타고 가는 대중교통이 지연돼서 좀 늦을 것 같아. 미안!',
+   '내가 탄 차가 갑자기 명상에 들어갔어. 최대한 빨리 갈게!']}},
+ {id:'jam', cat:'이동', title:'도로 정체가 심함', v:5, s:2, r:[1,1,.9,.8,1,.9],
+  late:{t:[0,0,.7,1], x:[
+   '도로가 예상보다 많이 막혀 늦을 것 같습니다. 죄송합니다.',
+   '길이 생각보다 많이 막혀서 좀 늦을 것 같아. 미안!',
+   '도로가 주차장이 돼 버렸어. 안전하게 최대한 빨리 갈게!']}},
+ {id:'prev-run', cat:'일정', title:'앞선 일정이 길어짐', v:3, s:1, r:[1,1,.9,.7,.9,.9],
+  late:{t:[0,0,.9,1], x:[
+   '앞선 일정이 예상보다 길어져서 조금 늦을 것 같습니다. 죄송합니다.',
+   '앞에 있던 일이 길어졌어. 조금 늦을 것 같아, 미안!',
+   '앞 일정이 연장전에 들어갔어. 끝나는 대로 바로 갈게!']}},
+ {id:'forgot-item', cat:'집안·개인', title:'소지품을 두고 나와 되돌아감', v:1, s:2, r:[1,1,.8,.7,1,.9],
+  late:{t:[0,0,.7,1], x:[
+   '중요한 소지품을 두고 나와 다시 가지러 가느라 조금 늦을 것 같습니다. 죄송합니다.',
+   '중요한 걸 두고 나와서 다시 가지러 가는 중이야. 조금 늦을 것 같아, 미안!',
+   '두고 온 물건이 나를 집으로 불러들였어. 금방 갈게!']}},
+ {id:'alarm', cat:'집안·개인', title:'알람이 울리지 않아 늦잠을 잠', v:1, s:4, r:[1,1,.4,.2,.8,.8],
+  late:{t:[0,0,.3,.9], x:[
+   '알람 설정에 문제가 있었는지 늦게 일어났습니다. 최대한 빨리 가겠습니다. 죄송합니다.',
+   '알람이 안 울렸는지 늦게 일어났어… 최대한 빨리 갈게, 미안!',
+   '알람이 나를 버렸어. 광속으로 준비해서 갈게!']}},
+ {id:'sick', cat:'건강', title:'갑자기 컨디션이 나빠짐', v:3, s:5, r:[1,1,.8,.6,1,.9],
+  cancel:{t:[.2,.6,.9,1], x:[
+   '갑자기 몸 상태가 좋지 않아 오늘 약속은 참석이 어려울 것 같습니다. 죄송합니다.',
+   '갑자기 몸이 안 좋아져서 오늘은 못 갈 것 같아. 미안해ㅠㅠ',
+   '내 몸이 갑자기 파업을 선언했어. 오늘은 못 갈 것 같아, 미안!']},
+  late:{t:[0,0,.7,.9], x:[
+   '갑자기 몸이 좋지 않아 잠시 쉬었다 가느라 조금 늦을 것 같습니다. 죄송합니다.',
+   '갑자기 속이 안 좋아서 좀 쉬었다 갈게. 조금 늦을 것 같아, 미안!',
+   '몸이 정비소에 잠깐 들렀다 가래. 조금만 늦을게!']}},
+ {id:'work', cat:'업무', title:'갑작스러운 업무 요청', v:5, s:4, r:[1,1,.3,.3,.9,.9],
+  cancel:{t:[.3,.7,1,1], x:[
+   '급하게 처리해야 할 업무 요청이 들어와 오늘 약속 참석이 어려울 것 같습니다. 죄송합니다.',
+   '갑자기 급한 업무가 들어와서 오늘은 못 갈 것 같아. 미안해!',
+   '퇴근 직전에 일이 떨어졌어. 오늘은 업무가 이겼다, 미안!']},
+  late:{t:[0,0,.9,1], x:[
+   '급한 업무 요청을 마무리하고 출발하느라 조금 늦을 것 같습니다. 죄송합니다.',
+   '급한 일 하나만 처리하고 출발할게. 조금 늦을 것 같아, 미안!',
+   '메일 하나만 보내고 바로 튀어 갈게!']}},
+ {id:'vague', cat:'집안·개인', title:'급한 개인 사정 (자세한 설명은 생략)', v:1, s:3, r:[.8,.4,.7,.7,.6,.8],
+  cancel:{t:[.6,.8,.9,1], x:[
+   '개인적으로 급하게 처리할 일이 생겨 참석이 어려울 것 같습니다. 자세히 말씀드리지 못해 죄송합니다.',
+   '개인적으로 급한 일이 생겨서 오늘은 못 갈 것 같아. 나중에 얘기해 줄게, 미안!',
+   '오늘은 비밀 임무가 생겼어. 나중에 썰 풀게, 미안!']},
+  late:{t:[0,0,.7,.9], x:[
+   '개인적으로 급하게 처리할 일이 있어 조금 늦을 것 같습니다. 죄송합니다.',
+   '급하게 처리할 개인 일이 있어서 조금 늦을 것 같아. 미안!',
+   '급한 일 하나 처리하고 바로 갈게. 자세한 건 이따 썰 풀게!']}},
+ {id:'home', cat:'집안·개인', title:'집에 갑자기 처리할 일이 생김', v:3, s:3, r:[1,1,.8,.7,.5,.9],
+  cancel:{t:[.2,.6,.9,1], x:[
+   '집에 급하게 처리해야 할 일이 생겨 오늘 약속은 어렵게 됐습니다. 죄송합니다.',
+   '집에 급하게 처리할 일이 생겨서 오늘은 못 갈 것 같아. 미안!',
+   '집에서 예상 못 한 일이 터졌어. 이게 어른의 삶인가 봐… 오늘은 패스할게, 미안!']},
+  late:{t:[0,0,.8,1], x:[
+   '집에서 급한 일을 처리하고 출발하느라 조금 늦을 것 같습니다. 죄송합니다.',
+   '집에 잠깐 처리할 일이 생겨서 조금 늦을 것 같아. 미안!',
+   '집에서 급한 일이 터졌는데 최대한 빨리 정리하고 갈게!']}},
+ {id:'clash', cat:'일정', title:'다른 일정과 겹쳐 있었음', v:4, s:3, r:[1,1,.7,.5,.9,.8],
+  cancel:{t:[.9,.8,.5,.2], x:[
+   '확인해 보니 같은 시간에 다른 일정이 겹쳐 있었습니다. 정말 죄송합니다.',
+   '확인해 보니까 그 시간에 다른 일정이 겹쳐 있더라. 정말 미안해!',
+   '내 달력이 이중 예약을 해 버렸어. 정말 미안!']}},
+ {id:'family-event', cat:'집안·개인', title:'가족 일정이 갑자기 확정됨', v:4, s:4, r:[1,.9,.8,.7,.3,.8],
+  cancel:{t:[.9,.8,.5,.2], x:[
+   '가족 일정이 갑자기 확정되어 참석이 어려울 것 같습니다. 죄송합니다.',
+   '집에 가족 일정이 갑자기 잡혔어. 오늘은 못 갈 것 같아, 미안!',
+   '가족 소집령이 떨어졌어. 거역할 수가 없다… 미안!']}},
+ {id:'admin', cat:'집안·개인', title:'처리해야 할 행정 업무가 남음', v:2, s:2, r:[1,1,.9,.8,.8,.9],
+  cancel:{t:[.9,.9,.6,.2], x:[
+   '처리해야 할 행정 업무가 남아 있어 오늘 약속은 어렵게 됐습니다. 죄송합니다.',
+   '처리해야 할 서류 일이 남아서 오늘은 못 갈 것 같아. 미안!',
+   '행정 업무가 나를 놓아주지 않아. 오늘은 서류가 이겼다, 미안!']}},
+ {id:'hospital', cat:'건강', title:'병원 진료 일정', v:4, s:3, r:[1,1,.8,.7,.9,.9],
+  cancel:{t:[.8,.8,.5,.2], x:[
+   '잡아 둔 병원 진료 일정과 겹쳐서 오늘은 참석이 어렵게 됐습니다. 죄송합니다.',
+   '병원 진료 일정이랑 겹쳐서 오늘은 못 갈 것 같아. 미안해!',
+   '병원이 나를 예약 순서대로 부르고 있어. 오늘은 못 갈 것 같아, 미안!']},
+  late:{t:[0,0,.9,1], x:[
+   '병원 진료가 예상보다 길어져서 조금 늦을 것 같습니다. 죄송합니다.',
+   '병원 진료가 생각보다 길어졌어. 조금 늦을 것 같아, 미안!',
+   '진료 대기가 끝이 없네. 끝나는 대로 바로 갈게!']}},
+ {id:'weather', cat:'이동', needsWeather:true, title:'궂은 날씨로 이동이 어려움', v:8, s:2, r:[1,1,.9,.8,1,.9],
+  cancel:{t:[.1,.6,.9,1], x:[
+   '악천후로 이동이 어려워 오늘 약속은 참석이 힘들 것 같습니다. 죄송합니다.',
+   '날씨가 너무 안 좋아서 이동하기가 어려워. 오늘은 못 갈 것 같아, 미안!',
+   '하늘이 오늘 외출 금지령을 내렸어. 못 갈 것 같아, 미안!']},
+  late:{t:[0,0,.9,1], x:[
+   '날씨 때문에 이동이 지연되어 조금 늦을 것 같습니다. 죄송합니다.',
+   '날씨 때문에 이동이 좀 느려졌어. 조금 늦을 것 같아, 미안!',
+   '날씨가 걸음을 붙잡고 있어. 최대한 서둘러 갈게!']}}
+];
+
+/* ---------- 저장소 (이 기기 브라우저에만) ---------- */
+const KEY = 'pgye-yebo-v1';
+let store = {log:[], fb:{}};
+try{
+  const raw = localStorage.getItem(KEY);
+  if(raw){ const o = JSON.parse(raw); if(o && Array.isArray(o.log)) store.log = o.log; if(o && o.fb && typeof o.fb === 'object') store.fb = o.fb; }
+}catch(e){}
+function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+
+/* ---------- 상태 ---------- */
+const state = {mode:'cancel', timing:1, imp:3, relId:null, name:'', alt:'', recent:new Set(), honestOnly:false, weather:false, open:'auto', tone:null, showAll:false};
+const form = $('#form'), results = $('#results');
+let lastIds = [];
+
+/* ---------- 점수 계산 ---------- */
+function repetition(ex){
+  let rep = 0; const now = Date.now(), win = 14*864e5;
+  for(const l of store.log){
+    if(!l || now - l.ts > win) continue;
+    if(l.id === ex.id) rep = Math.max(rep, .9);
+    else if(l.cat === ex.cat && ex.cat !== '솔직') rep = Math.max(rep, .45);
+  }
+  if(state.recent.has(ex.cat) && ex.cat !== '솔직') rep = Math.max(rep, .45);
+  return rep;
+}
+function evaluate(ex, rel, relIdx){
+  const m = ex[state.mode]; if(!m) return null;
+  if(ex.needsWeather && !state.weather) return null;
+  if(state.honestOnly && !ex.honest) return null;
+  const tf = m.t[state.timing], rf = ex.r[relIdx];
+  if(tf < .15 || rf < .2) return null;
+  const impF = .4 + .6*(state.imp-1)/4;
+  let V = ex.v/10 * (.6 + .4*rel.sens);
+  if(ex.needsWeather) V *= .3;
+  const M = 1 - Math.sqrt(tf*rf);
+  const S = ex.s/10 * impF * (.7 + .3*rel.sens);
+  const R = repetition(ex);
+  let risk = .30*V + .25*M + .25*S + .20*R;
+  if(ex.honest && state.imp >= 4) risk *= .85;
+  const st = store.fb[ex.id];
+  if(st) risk += Math.max(-.08, Math.min(.08, ((st.fail||0) - (st.ok||0)) * .02));
+  risk = Math.max(.02, Math.min(.98, risk));
+  const fit = Math.sqrt(tf*rf);
+  return {ex, m, tf, rf, V, M, S, R, risk, fit, sc: fit*(1-risk), pct: Math.max(3, Math.min(97, Math.round(risk*220)))};
+}
+const level = pct => pct <= 30 ? 'low' : pct <= 55 ? 'mid' : 'high';
+const LV_WORD = {low:'낮음', mid:'보통', high:'높음'};
+
+/* ---------- 문구 만들기 ---------- */
+function compose(ex, mode, tone, name, alt){
+  const body = ex[mode].x[TONE_IDX[tone]];
+  const n = name.trim(), a = alt.trim();
+  let close;
+  if(mode === 'cancel'){
+    close = tone === 'polite' ? (a ? `${a}쯤 다시 일정을 잡아도 될까요?` : '괜찮으시다면 다른 날로 다시 조율해도 될까요?')
+          : tone === 'casual' ? (a ? `${a}쯤 꼭 다시 보자!` : '다음에 꼭 다시 날짜 잡자!')
+          : (a ? `${a}쯤 만회할 기회를 줘!` : '다음엔 꼭 만회할게!');
+  } else {
+    close = tone === 'polite' ? (a ? `${a}쯤 도착할 것 같습니다.` : '도착 예정 시간은 다시 말씀드리겠습니다.')
+          : (a ? `${a}쯤 도착할 것 같아!` : '도착 시간은 다시 알려 줄게!');
+  }
+  return `${n ? n + ', ' : ''}${tone === 'polite' ? '안녕하세요. ' : ''}${body} ${close}`;
+}
+function currentTone(rel){ return rel.tones.includes(state.tone) ? state.tone : rel.def; }
+
+/* ---------- 렌더 ---------- */
+function whyChips(r, rel){
+  const {ex, tf, rf, R} = r, good = [], warn = [];
+  if(ex.honest) good.push('솔직한 사유라 뒤탈이 없어요');
+  else if(ex.needsWeather) good.push('오늘 실제 날씨와 맞아요');
+  else if(ex.v <= 2) good.push('상대가 확인하기 어려워요');
+  if(tf >= .9) good.push('지금 시점에 자연스러워요');
+  if(rf >= .9) good.push(`${rel.label}에게 무난해요`);
+  if(ex.s <= 2) good.push('들켜도 후폭풍이 작아요');
+  if(ex.v >= 6 && !ex.needsWeather) warn.push('상대가 확인할 수 있어요');
+  if(R > 0) warn.push('최근 쓴 유형이에요');
+  if(rf <= .5) warn.push(`${rel.label}에게는 어색할 수 있어요`);
+  if(tf <= .4) warn.push('지금 시점엔 어색할 수 있어요');
+  return good.slice(0,3).map(t => `<span class="chip good">${esc(t)}</span>`).join('')
+       + warn.slice(0,2).map(t => `<span class="chip warn">${esc(t)}</span>`).join('');
+}
+function cardHTML(r, i, openId, rel, timeStr){
+  const ex = r.ex, open = ex.id === openId, lv = level(r.pct);
+  let body = '';
+  if(open){
+    const tone = currentTone(rel);
+    const text = compose(ex, state.mode, tone, state.name, state.alt);
+    const tabs = rel.tones.length > 1
+      ? `<div class="seg chips tone" role="radiogroup" aria-label="말투">${rel.tones.map(t => `<label><input type="radio" name="tone-${ex.id}" value="${t}" data-act="tone" data-key="tone-${ex.id}-${t}" ${t === tone ? 'checked' : ''}><span>${TONE_LABEL[t]}</span></label>`).join('')}</div>`
+      : `<p class="hint tone">${esc(rel.label)}에게는 정중한 문구만 제공해요.</p>`;
+    body = `<div class="card-body">
+      <div class="chips">${whyChips(r, rel)}</div>
+      ${tabs}
+      <div class="chat"><time class="time">${esc(timeStr)}</time><div class="bubble">${esc(text)}</div></div>
+      <div class="actions">
+        <button type="button" class="btn primary" data-act="copy" data-id="${ex.id}" data-key="copy-${ex.id}">카톡 문구 복사</button>
+        <span class="fb-label">써 본 뒤 결과를 남기면 순위에 반영돼요</span>
+        <button type="button" class="btn" data-act="ok" data-id="${ex.id}" data-key="ok-${ex.id}">통했어요</button>
+        <button type="button" class="btn" data-act="fail" data-id="${ex.id}" data-key="fail-${ex.id}">걸렸어요</button>
+      </div>
+    </div>`;
+  }
+  return `<li class="card${i === 0 ? ' first' : ''}">
+    <button type="button" class="card-head" aria-expanded="${open}" data-act="toggle" data-id="${ex.id}" data-key="toggle-${ex.id}">
+      <span class="rank" aria-label="${i+1}위">${i+1}</span>
+      <span><span class="title">${esc(ex.title)}</span><span class="cat${ex.honest ? ' honest' : ''}">${ex.honest ? '솔직한 사유' : esc(ex.cat)}</span></span>
+      <span class="risk"><span class="risk-label ${lv}">리스크 ${LV_WORD[lv]} ${r.pct}%</span>
+        <span class="gauge" role="img" aria-label="리스크 ${r.pct}%"><i style="left:${r.pct}%"></i></span></span>
+    </button>${body}</li>`;
+}
+function render(){
+  const activeKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : null;
+  const relIdx = REL.findIndex(r => r.id === state.relId);
+  if(relIdx < 0){
+    lastIds = [];
+    results.innerHTML = `<div class="empty"><h2>상대를 고르면 순위가 나와요</h2><p>상대가 확인할 수 있는지, 지금 시점에 자연스러운지, 들켰을 때 후폭풍이 큰지, 최근에 반복했는지를 따져서 덜 위험한 순서로 정리해 드려요.</p></div>`;
+    return;
+  }
+  const rel = REL[relIdx];
+  const list = DB.map(ex => evaluate(ex, rel, relIdx)).filter(Boolean).sort((a,b) => b.sc - a.sc);
+  lastIds = list.map(r => r.ex.id);
+  const summary = `${rel.label}에게 ${state.mode === 'cancel' ? '못 간다고 알릴 때' : '늦는다고 알릴 때'}, ${TIMING[state.timing]}, 중요도 ${state.imp}`;
+  if(!list.length){
+    results.innerHTML = `<div class="res-head"><h2>추천 순위</h2><p class="summary">${esc(summary)}</p></div>
+      <div class="empty"><p>조건에 맞는 사유가 없어요. '솔직한 사유만 보기'를 끄거나 시간과 상황을 바꿔 보세요.</p></div>`;
+    return;
+  }
+  const shown = state.showAll ? list : list.slice(0,5);
+  const openId = state.open === 'auto' ? list[0].ex.id : state.open;
+  const timeStr = new Date().toLocaleTimeString('ko-KR', {hour:'numeric', minute:'2-digit'});
+  const hasHistory = store.log.length > 0 || Object.keys(store.fb).length > 0;
+  results.innerHTML = `
+    <div class="res-head"><h2>추천 순위</h2><p class="summary">${esc(summary)}</p></div>
+    ${state.imp >= 4 ? '<p class="note">중요도가 높은 약속이에요. 길게 꾸미기보다 짧고 솔직하게 말하는 쪽이 신뢰를 지켜요.</p>' : ''}
+    <ol class="list">${shown.map((r,i) => cardHTML(r, i, openId, rel, timeStr)).join('')}</ol>
+    <div class="more">
+      ${list.length > 5 ? `<button type="button" class="link-btn" data-act="more" data-key="more">${state.showAll ? '상위 5개만 보기' : `나머지 ${list.length - 5}개 더 보기`}</button>` : ''}
+      ${hasHistory ? '<button type="button" class="link-btn" data-act="clear" data-key="clear">사용 이력 지우기</button>' : ''}
+    </div>`;
+  if(activeKey){
+    const el = results.querySelector(`[data-key="${CSS.escape(activeKey)}"]`);
+    if(el) el.focus({preventScroll:true});
+  }
+}
+
+/* ---------- 입력 폼 ---------- */
+function initForm(){
+  $('#timing').innerHTML = TIMING.map((t,i) => `<label><input type="radio" name="timing" value="${i}" ${i === state.timing ? 'checked' : ''}><span>${t}</span></label>`).join('');
+  $('#rel').innerHTML = REL.map(r => `<label><input type="radio" name="rel" value="${r.id}"><span>${r.label}</span></label>`).join('');
+  $('#recent').innerHTML = CATS.map(c => `<label><input type="checkbox" name="recent" value="${c}"><span>${c}</span></label>`).join('');
+}
+function checked(name){ const e = form.querySelector(`input[name="${name}"]:checked`); return e ? e.value : null; }
+function sync(){
+  state.mode = checked('mode') || 'cancel';
+  const late = state.mode === 'late';
+  const tin = [...form.querySelectorAll('input[name="timing"]')];
+  tin.forEach((el,i) => { el.disabled = late && i < 2; });
+  let t = +checked('timing');
+  if(late && t < 2){ t = 2; tin[2].checked = true; }
+  state.timing = t;
+  state.imp = +form.imp.value;
+  state.relId = checked('rel');
+  state.name = form.name.value;
+  state.alt = form.alt.value;
+  state.recent = new Set([...form.querySelectorAll('input[name="recent"]:checked')].map(e => e.value));
+  state.honestOnly = form.honestOnly.checked;
+  state.weather = form.weather.checked;
+  $('#impOut').innerHTML = `<b>${state.imp}</b> ${IMP_LABEL[state.imp]}`;
+  $('#altLabel').textContent = late ? '도착 예정 시각 (선택)' : '다시 잡을 시점 (선택)';
+  form.alt.placeholder = late ? '예: 20분 뒤' : '예: 이번 주말';
+  render();
+}
+form.addEventListener('input', sync);
+form.addEventListener('change', sync);
+form.addEventListener('submit', e => e.preventDefault());
+
+/* ---------- 결과 영역 이벤트 ---------- */
+let toastTimer;
+function toast(msg){
+  $('#toastText').textContent = msg;
+  const el = $('#toast'); el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); return true; }catch(e){}
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly',''); ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy'); document.body.removeChild(ta); return ok;
+  }catch(e){ return false; }
+}
+results.addEventListener('click', async e => {
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const act = b.dataset.act, id = b.dataset.id;
+  if(act === 'toggle'){
+    const cur = state.open === 'auto' ? lastIds[0] : state.open;
+    state.open = cur === id ? null : id; render();
+  } else if(act === 'more'){
+    state.showAll = !state.showAll; render();
+  } else if(act === 'copy'){
+    const rel = REL.find(r => r.id === state.relId), ex = DB.find(x => x.id === id);
+    if(!rel || !ex) return;
+    const ok = await copyText(compose(ex, state.mode, currentTone(rel), state.name, state.alt));
+    if(ok){
+      store.log.push({id: ex.id, cat: ex.cat, ts: Date.now()});
+      store.log = store.log.slice(-60); persist();
+      toast('복사했어요. 이 유형은 다음 추천에서 조금 뒤로 밀려요.');
+    } else {
+      toast('복사하지 못했어요. 문구를 길게 눌러 직접 복사해 주세요.');
+    }
+  } else if(act === 'ok' || act === 'fail'){
+    const st = store.fb[id] || {ok:0, fail:0};
+    st[act] = (st[act] || 0) + 1; store.fb[id] = st; persist();
+    toast(act === 'ok' ? '반영했어요. 다음 순위에서 조금 더 위로 올라가요.' : '반영했어요. 다음 순위에서 조금 더 아래로 내려가요.');
+  } else if(act === 'clear'){
+    store = {log:[], fb:{}}; persist(); render(); toast('사용 이력을 지웠어요.');
+  }
+});
+results.addEventListener('change', e => {
+  const t = e.target;
+  if(t && t.dataset && t.dataset.act === 'tone'){ state.tone = t.value; render(); }
+});
+
+try{ $('#today').textContent = '오늘의 예보 · ' + new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'}); }catch(e){}
+initForm();
+sync();
+})();
+</script>
+</body>
+</html>
